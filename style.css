@@ -62,18 +62,47 @@ body > section {
 	display: flex;
 	flex-direction: row;
 	align-items: flex-start;
-	gap: clamp(1rem, 2vw, 1.5rem);
-	padding: clamp(1.5rem, 4vw, 3rem);
+	--timeline-gap: clamp(1rem, 2.5vw, 1.75rem);
+	--timeline-padding: clamp(1.25rem, 3.5vw, 2.5rem);
+	gap: var(--timeline-gap);
+	padding: var(--timeline-padding);
 	overflow-x: auto;
 	overflow-y: hidden;
 	-webkit-overflow-scrolling: touch;
+	/* Scroll snap: desktop horizontal timeline */
+	scroll-snap-type: x mandatory;
+	scroll-padding-left: var(--timeline-padding);
+	scroll-padding-right: var(--timeline-padding);
+	scroll-behavior: smooth;
+	/* Keep the horizontal scrollbar visible */
+	scrollbar-color: #0071c5 #e6f2fb;
+	scrollbar-width: auto;
+}
+
+/* WebKit scrollbar styling to match the hero colors */
+body > section::-webkit-scrollbar {
+	height: 12px;
+}
+
+body > section::-webkit-scrollbar-track {
+	background: #e6f2fb;
+}
+
+body > section::-webkit-scrollbar-thumb {
+	background: #0071c5;
+	border-radius: 999px;
 }
 
 /* Timeline cards: sizing */
 /* Timeline cards */
 body > section > div {
-	flex: 0 0 auto;
-	min-width: clamp(60px, 7.5vw, 90px);
+	flex: 0 0 calc((100% - (2 * var(--timeline-gap)) - (2 * var(--timeline-padding))) / 3);
+	min-width: calc((100% - (2 * var(--timeline-gap)) - (2 * var(--timeline-padding))) / 3);
+	width: calc((100% - (2 * var(--timeline-gap)) - (2 * var(--timeline-padding))) / 3);
+	aspect-ratio: 1 / 1;
+	/* Scroll snap: card snap points */
+	scroll-snap-align: start;
+	scroll-snap-stop: always;
 }
 
 /* Timeline cards: base container */
@@ -83,29 +112,30 @@ body > section > div {
 	border: 1px solid rgba(0, 0, 0, 0.06);
 	border-radius: 12px;
 	box-shadow: 0 10px 22px rgba(0, 0, 0, 0.08);
-	padding: clamp(0.25rem, 0.625vw, 0.375rem);
+	padding: clamp(0.6rem, 1.4vw, 0.95rem);
 	font-family: system-ui, -apple-system, "Segoe UI", Helvetica, Arial, sans-serif;
 	/* Keep overlay anchored to each card */
 	position: relative;
 	overflow: hidden;
-	--card-img-height: clamp(55px, 9vw, 90px);
-	--card-title-space: clamp(2.4rem, 4.6vw, 3.1rem);
+	display: flex;
+	flex-direction: column;
+	--card-img-height: 55%;
+	--card-title-space: clamp(3.4rem, 5.8vw, 4.2rem);
 	color: var(--text-primary);
 }
 
-/* Timeline cards: typography */
-/* Card typography */
+/* Timeline card typography */
 body > section > div h2 {
-	margin: 0 0 0.4rem;
-	font-size: clamp(0.95rem, 1.6vw, 1.1rem);
+	margin: 0 0 0.25rem;
+	font-size: clamp(0.9rem, 1.2vw, 1.1rem);
 	font-weight: 700;
 	letter-spacing: 0.02em;
 	color: var(--primary-blue);
 }
 
 body > section > div h3 {
-	margin: 0 0 0.6rem;
-	font-size: clamp(1.1rem, 2.2vw, 1.35rem);
+	margin: 0 0 0.45rem;
+	font-size: clamp(1.05rem, 1.4vw, 1.25rem);
 	font-weight: 700;
 	color: var(--text-primary);
 }
@@ -113,19 +143,20 @@ body > section > div h3 {
 /* Timeline cards: description overlay */
 body > section > div p {
 	margin: 0;
-	font-size: clamp(0.95rem, 1.6vw, 1.05rem);
-	line-height: 1.6;
+	font-size: clamp(0.9rem, 1.2vw, 1rem);
+	line-height: 1.5;
 	color: var(--text-secondary);
 	/* Hover description sits over the image */
 	position: absolute;
 	left: clamp(0.25rem, 0.6vw, 0.45rem);
 	right: clamp(0.25rem, 0.6vw, 0.45rem);
-	top: calc(var(--card-title-space) + 0.25rem);
-	height: var(--card-img-height);
+	top: auto;
+	bottom: clamp(0.25rem, 0.6vw, 0.45rem);
+	height: auto;
 	display: flex;
 	align-items: center;
-	justify-content: center;
-	text-align: center;
+	justify-content: flex-start;
+	text-align: left;
 	background: rgba(11, 27, 43, 0.78);
 	color: #ffffff;
 	border-radius: 8px;
@@ -133,15 +164,16 @@ body > section > div p {
 	pointer-events: none;
 }
 
-/* Timeline cards: image sizing */
-/* Card spacing & polish */
+/* Timeline card image sizing */
 body > section > div img {
 	max-width: 100%;
-	width: 100%;
-	height: var(--card-img-height);
+	width: calc(100% - 1rem);
+	max-height: none;
+	height: auto;
+	aspect-ratio: 1 / 1;
 	object-fit: cover;
 	border-radius: 8px;
-	margin: 0.25rem 0;
+	margin: 0.5rem;
 	display: block;
 }
 
@@ -149,13 +181,13 @@ body > section > div img {
 /* Card detail hidden state */
 body > section > div p {
 	opacity: 0;
-	transform: translateY(6px);
+	transform: translateY(10px);
 	transition: opacity 0.25s ease, transform 0.25s ease;
 }
 
 /* Card hover / focus reveal */
-body > section > div:hover p,
-body > section > div:focus-within p {
+body > section > div img:hover + p,
+body > section > div img:focus + p {
 	opacity: 1;
 	transform: translateY(0);
 }
@@ -178,14 +210,18 @@ body > section > div:focus-within {
 		overflow-x: visible;
 		overflow-y: visible;
 		padding: clamp(1rem, 4vw, 2rem);
+		/* Disable snap on mobile */
+		scroll-snap-type: none;
 	}
 
 	body > section > div {
 		min-width: 100%;
-		--card-img-height: clamp(90px, 30vw, 140px);
-		--card-title-space: clamp(2.8rem, 6vw, 3.6rem);
+		--card-img-height: 55%;
+		--card-title-space: clamp(3.6rem, 7vw, 4.4rem);
 	}
 }
+
+/* Mobile font and image adjustments */
 
 @media (hover: none) {
 	body > section > div p {
